@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace</title>
+  <style>
+    body {
+      background-color: #1a1d2e;
+      font-family: Arial, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: #272d44;
+      padding: 20px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      background-color: #272d44;
+      padding: 10px 0;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #444b6b;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .nav a:hover {
+      background-color: #575f7f;
+    }
+    .nav .active {
+      background-color: #2f3651;
+    }
+    .content {
+      padding: 20px;
+    }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    .buttons .button {
+      display: inline-block;
+      background-color: #444b6b;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .buttons .button:hover {
+      background-color: #575f7f;
+    }
+    .categories {
+      display: none;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+    .category {
+      background-color: #444b6b;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .category:hover {
+      background-color: #575f7f;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #444b6b;
+      border-radius: 5px;
+      background-color: #2e3140;
+      color: white;
+    }
+    .search-results .search-result {
+      background-color: #444b6b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .search-result h3 {
+      margin-top: 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #272d44;
+    }
+    .seller-button {
+      background-color: #444b6b;
+      padding: 15px 30px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 30px;
+      display: block;
+      width: 100%;
+    }
+    .seller-button:hover {
+      background-color: #575f7f;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Marketplace</h1>
+  </header>
+  <nav class="nav">
+    <a href="javascript:void(0);" id="main-link" onclick="showPage('main')">Главная</a>
+    <a href="javascript:void(0);" id="search-link" onclick="showPage('search')">Поиск</a>
+    <a href="javascript:void(0);" id="profile-link" onclick="showPage('profile')">Профиль</a>
+  </nav>
+  <main class="content">
+    <!-- Главная -->
+    <section id="main" class="page active">
+      <h2>Добро пожаловать на Marketplace</h2>
+      <div class="buttons">
+        <div class="button" onclick="showCategories()">Категории</div>
+        <div class="button" onclick="openAllProducts()">Все товары</div>
+      </div>
+      <div class="categories" id="categories" style="display: none;">
+        <div class="category" onclick="openCategoryPage('home')">Для дома</div>
+        <div class="category" onclick="openCategoryPage('tech')">Техника</div>
+        <div class="category" onclick="openCategoryPage('clothes')">Одежда</div>
+      </div>
+      <button class="seller-button" onclick="openSellerForm()">Стать продавцом</button>
+    </section>
+    <!-- Поиск -->
+    <section id="search" class="page" style="display: none;">
+      <h2>Поиск товаров</h2>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Введите запрос для поиска" oninput="searchProducts()">
+      </div>
+      <div id="search-results" class="search-results"></div>
+    </section>
+    <!-- Профиль -->
+    <section id="profile" class="page" style="display: none;">
+      <h2>Профиль</h2>
+      <p>Ваш уникальный ID: <span id="user-id"></span></p>
+    </section>
+  </main>
+  <footer class="footer">
+    Marketplace © 2024
+  </footer>
+  <script>
+    const categories = {
+      'home': [
+        { id: 1, title: 'Уютный диван', description: 'Мягкий и удобный диван.', price: 1200 },
+        { id: 2, title: 'Стол', description: 'Комплект мебели.', price: 2000 }
+      ],
+      'tech': [
+        { id: 3, title: 'Смартфон', description: 'Мощный и компактный.', price: 500 },
+        { id: 4, title: 'Ноутбук', description: 'Современный и лёгкий.', price: 1200 },
+      ],
+      'clothes': [{ id: 5, title: 'Куртка', description: 'Классическая.', price: 40 }],
+    };
+
+    // Уникальный ID
+    function getUserId() {
+      let userId = localStorage.getItem('userId');
+      if (!userId) {
+        userId = 'USER-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        localStorage.setItem('userId', userId);
+      }
+      return userId;
+    }
+
+    document.getElementById('user-id').textContent = getUserId();
+
+    // Переключение страниц
+    function showPage(pageId) {
+      document.querySelectorAll(".page").forEach(page => {
+        page.style.display = "none";
+      });
+      document.getElementById(pageId).style.display = "block";
+      document.querySelectorAll(".nav a").forEach(link => {
+        link.classList.remove('active');
+      });
+      document.getElementById(pageId + "-link").classList.add('active');
+    }
+
+    // Показ категорий
+    function showCategories() {
+      const categories = document.getElementById('categories');
+      categories.style.display = categories.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    // Страница категории
+    function openCategoryPage(category) {
+      const items = categories[category];
+      const html = items.map(item => `
+        <div class="search-result">
+          <h3>${item.title}</h3>
+          <p>${item.description}</p>
+          <p>Цена: ${item.price} ₽</p>
+        </div>`).join('');
+      openNewPage(html);
+    }
+
+    // Все товары
+    function openAllProducts() {
+      const allItems = Object.values(categories).flat();
+      const html = allItems.map(item => `
+        <div class="search-result">
+          <h3>${item.title}</h3>
+          <p>${item.description}</p>
+          <p>Цена: ${item.price} ₽</p>
+        </div>`).join('');
+      openNewPage(html);
+    }
+
+    // Открытие новой страницы
+    function openNewPage(content) {
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(`
+        <html>
+        <head>
+          <title>Товары</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; background-color: #1a1d2e; color: white; }
+            .search-result { background-color: #2e3140; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <h2>Товары</h2>
+          ${content}
+        </body>
+        </html>
+      `);
+    }
+
+    // Поиск товаров
+    function searchProducts() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const results = [];
+      Object.values(categories).forEach(category => {
+        category.forEach(item => {
+          if (item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
+            results.push(item);
+          }
+        });
+      });
+
+      const resultsHtml = results.map(item => `
+        <div class="search-result">
+          <h3>${item.title}</h3>
+          <p>${item.description}</p>
+          <p>Цена: ${item.price} ₽</p>
+        </div>`).join('');
+      document.getElementById('search-results').innerHTML = resultsHtml;
+    }
+
+    // Форма для продавца
+    function openSellerForm() {
+      alert('Пожалуйста, заполните форму продавца в чат-боте.');
+    }
+  </script>
+</body>
+</html>
